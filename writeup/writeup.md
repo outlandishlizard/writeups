@@ -109,7 +109,8 @@ ValueError: non-hexadecimal number found in fromhex() arg at position 63
 
 ```
 
-This error looks familiar-- it seems that some of our labels aren't even-length hex strings. Looking at the packet in question, we see it has a different first label-- `16` rather than `0` like most of the earlier packets. The next few queries and responses also have nonzero first labels, and they seem to be counting down. The second label is also considerably longer in these queries-- they are all 63 characters, which is the maximum allowed length for a DNS label. All of this put together suggested to me that these labels might be sequential data in a multi-part message.
+This error looks familiar-- it seems that some of our labels aren't even-length hex strings. Looking at the packet in question, we see it has a different first label-- `16` rather than `0` like most of the earlier packets. The next few queries and responses also have nonzero first labels, and they seem to be counting down. 
+
 
 ```
 "4429","185.799511293","fd00:6e73:6563:3232::23","fd00:6e73:6563:3232::100","DNS","171","Standard query 0xc267 AAAA 16.746f74616c2033330a647277782d2d2d2d2d2d20203620726f6f7420726f6f7.echo.474f415453.wpad.ctf"
@@ -125,6 +126,7 @@ This error looks familiar-- it seems that some of our labels aren't even-length 
 
 ```
 
+The second label is also considerably longer in these queries-- they are all 63 characters, which is the maximum allowed length for a DNS label. All of this put together suggested to me that these labels might be sequential data in a multi-part message
 
 
 ```python3
