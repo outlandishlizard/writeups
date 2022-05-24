@@ -126,7 +126,7 @@ This error looks familiar-- it seems that some of our labels aren't even-length 
 
 ```
 
-The second label is also considerably longer in these queries-- they are all 63 characters, which is the maximum allowed length for a DNS label. All of this put together suggested to me that these labels might be sequential data in a multi-part message
+The second label is also considerably longer in these queries-- they are all 63 characters, which is the maximum allowed length for a DNS label. All of this put together suggested to me that these labels might be sequential data in a multi-part message. To check if this was the case, I tried modifying my code to concatenate together sequential messages with nonzero labels:
 
 
 ```python3
