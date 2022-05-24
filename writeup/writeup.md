@@ -1,22 +1,22 @@
 This challenge was part of a series of challenges all involving the same packet capture file (link). For this specific challenge, we were told to examine traffic to and from `fd00:6e73:6563:3232::23`, so let's fire up wireshark and get filtering!
 
 We start out by applying the filter `ipv6.addr == fd00:6e73:6563:3232::23` to scope things down to the host of interest. We probably normally would also need to filter for only DNS traffic (since the challenge text hints that they've noticed abnormal DNS traffic), but in this particular case the capture seems to only contain DNS traffic to/from the host in question, so we get away with not adding protocol to our filter statement.
- ![Initial Filtering](/1.png)
+ ![Initial Filtering](./1.png)
 
 As you can see, there's some noise left in the capture-- DNS queries to things like spotify and microsot update. However, within the first few packets there are also requests for a .ctf domain, namely wpad.ctf. This is promising-- lets refine our filter to just this domain for now using: `ipv6.addr == fd00:6e73:6563:3232::23 and dns.qry.name contains wpad.ctf`
- ![Just wpad.ctf](/2.png)
+ ![Just wpad.ctf](./2.png)
 
 Now, looking at the first packet in the new view, we see a request for a long subdomainfrom our target host, specifically `474f415453.wpad.ctf`. At first, I thought this was probably information being exfiltrated directly, but looking further down the capture, we can actually see that this exact subdomain gets requested a LOT, which suggests it's not being used to exfiltrate data directly, as we'd expect to see many different similarly formatted subdomains and few repeated values if that were the case. Let's see if the response to this query can shed any light on what is going on:
- ![First Response to 474f415453.wpad.ctf](/3.png)
+ ![First Response to 474f415453.wpad.ctf](./3.png)
 
 Looking at the answer section here, at first it just seems to be a regular response containing a (short) IPv6 address. However, when we look further down at the actual packet bytes pane, we can see that there seems to be an ACII "NO" in the bytes of the IPv6 address. This suggests that we should be looking out for IPv6 addresses that contain bytes that look like printable characters. Honestly, at this point I just scrolled through the whole capture watching the bottom pane, which led me to the first flag, spread across the next few packets! 
- ![First Flag](/4.png)
+ ![First Flag](./4.png)
 
 During this same scrolling process, I noticed some other interesting packets-- namely, query responses that contain `SHELL:` followed by various strings that look like shell commands in the IPv6 address. 
- ![Shell Commands](/5.png)
+ ![Shell Commands](./5.png)
 
 Right after the first `SHELL:` response (`SHELL:hostname`), the pattern of queries also changes-- we start seeing requests for something other than `474f415453.wpad.ctf`-- the immediate next query is for `0.7666742d7365637572652d7661756c742e7972722e636f7270.echo.474f415453.wpad.ctf`:
- ![New Queries](/6.png)
+ ![New Queries](./6.png)
 
 This definitely looks like some sort of data being exfiltrated-- my first attempt at decoding was to just take everything after `echo` and try to decode it; since all of the characters appear to be in the hex range, I tried decoding it as hex bytes and interpreting them as ascii using python3:
 `>>> s = '0.7666742d7365637572652d7661756c742e7972722e636f7270'
