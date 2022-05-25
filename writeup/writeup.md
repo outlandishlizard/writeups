@@ -72,7 +72,7 @@ At this point, some less-manual inspection was in order; probably the most corre
 "1530","109.514634653","fd00:6e73:6563:3232::100","fd00:6e73:6563:3232::23","DNS","157","Standard query response 0x9b98 AAAA 0.726f7369652e6d65796572.echo.474f415453.wpad.ctf AAAA 0:4f4b::"
 ```
 
-This is the quick and dirty code that I used as a first pass to extract the exfiltrated data (note that it doesn't grab the commands being executed, no real reason other than laziness). This code slightly differs from what I was doing in the above examples, in that it just takes the entirety of the long hex label, and ignores the leading 0. label:
+This is the quick and dirty code that I used as a first pass to extract the exfiltrated data (note that it doesn't grab the commands being executed, no real reason other than laziness). This code slightly differs from what I was doing in the above examples, in that it just takes the entirety of the long hex label, and ignores the leading `0.`:
 
 
 ```python3
