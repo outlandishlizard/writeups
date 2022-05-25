@@ -1,6 +1,6 @@
 # Portabello 53 - Bargaining
 
-This challenge was part of a series of challenges all involving the same packet capture file (link). For this specific challenge, we were told to examine traffic to and from `fd00:6e73:6563:3232::23`, so let's fire up wireshark and get filtering!
+This challenge was part of a series of challenges all involving the same packet capture file, which is available in this repo. For this specific challenge, we were told to examine traffic to and from `fd00:6e73:6563:3232::23`, so let's fire up wireshark and get filtering!
 
 We start out by applying the filter `ipv6.addr == fd00:6e73:6563:3232::23` to scope things down to the host of interest. We probably normally would also need to filter for only DNS traffic (since the challenge text hints that they've noticed abnormal DNS traffic), but in this particular case the capture seems to only contain DNS traffic to/from the host in question, so we get away with not adding protocol to our filter statement.
 
