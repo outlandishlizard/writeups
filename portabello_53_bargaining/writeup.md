@@ -7,7 +7,7 @@ We start out by applying the filter `ipv6.addr == fd00:6e73:6563:3232::23` to sc
 
  ![Initial Filtering](./1.png)
 
-As you can see, there's some noise left in the capture-- DNS queries to things like spotify and microsot update. However, within the first few packets there are also requests for a .ctf domain, namely wpad.ctf. This is promising-- lets refine our filter to just this domain for now using: `ipv6.addr == fd00:6e73:6563:3232::23 and dns.qry.name contains wpad.ctf`
+As we can see, there's some noise left in the capture-- DNS queries to things like spotify and microsot update. However, within the first few packets there are also requests for a .ctf domain, namely wpad.ctf. This is promising-- lets refine our filter to just this domain for now using: `ipv6.addr == fd00:6e73:6563:3232::23 and dns.qry.name contains wpad.ctf`
 
 
  ![Just wpad.ctf](./2.png)
