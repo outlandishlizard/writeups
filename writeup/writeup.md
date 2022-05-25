@@ -174,7 +174,7 @@ for line in lines[1:]:
                 print('error',builder)
 ```
 
-It produced the following result:
+It produced the following result. Note that the output is getting duplicated because my above code is buggy and doesn't reset the `builder` variable after outputting a multipart message-- I actually never paid enough attention to my output during the CTF to notice this issue since it was still usable:
 
 
 ```shell
