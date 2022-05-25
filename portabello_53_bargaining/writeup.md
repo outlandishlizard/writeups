@@ -1,6 +1,6 @@
 # Portabello 53 - Bargaining
 
-This challenge was part of a series of challenges all involving the same packet capture file (link). For this specific challenge, we were told to examine traffic to and from `fd00:6e73:6563:3232::23`, so let's fire up wireshark and get filtering!
+This challenge was part of a series of challenges all involving the same packet capture file, which is available in this repo as `portobello53.pcapng `. For this specific challenge, we were told to examine traffic to and from `fd00:6e73:6563:3232::23`, so let's fire up wireshark and get filtering!
 
 We start out by applying the filter `ipv6.addr == fd00:6e73:6563:3232::23` to scope things down to the host of interest. We probably normally would also need to filter for only DNS traffic (since the challenge text hints that they've noticed abnormal DNS traffic), but in this particular case the capture seems to only contain DNS traffic to/from the host in question, so we get away with not adding protocol to our filter statement.
 
@@ -72,7 +72,7 @@ At this point, some less-manual inspection was in order; probably the most corre
 "1530","109.514634653","fd00:6e73:6563:3232::100","fd00:6e73:6563:3232::23","DNS","157","Standard query response 0x9b98 AAAA 0.726f7369652e6d65796572.echo.474f415453.wpad.ctf AAAA 0:4f4b::"
 ```
 
-This is the quick and dirty code that I used as a first pass to extract the exfiltrated data (note that it doesn't grab the commands being executed, no real reason other than laziness). This code slightly differs from what I was doing in the above examples, in that it just takes the entirety of the long hex label, and ignores the leading 0. label:
+This is the quick and dirty code that I used as a first pass to extract the exfiltrated data (note that it doesn't grab the commands being executed, no real reason other than laziness). This code slightly differs from what I was doing in the above examples, in that it just takes the entirety of the long hex label, and ignores the leading `0.`:
 
 
 ```python3
@@ -174,7 +174,7 @@ for line in lines[1:]:
                 print('error',builder)
 ```
 
-It produced the following result:
+It produced the following result. Note that the output is getting duplicated because my above code is buggy and doesn't reset the `builder` variable after outputting a multipart message-- I actually never paid enough attention to my output during the CTF to notice this issue since it was still usable:
 
 
 ```shell
