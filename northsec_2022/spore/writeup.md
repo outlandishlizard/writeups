@@ -125,7 +125,7 @@ When we inspect the style of `<script>`, we don't see the bulk of our injection-
 
  ![Still No Injection](./styles_fail.png)
 
- ![Formatting Looks Funny](./styles_formatting)
+ ![Formatting Looks Funny](./styles_formatting.png)
 
 
 Given the formatting issues we saw, I decided to pass the payload through a [minifier](https://www.toptal.com/developers/cssminifier/) and URLEncoded it.
