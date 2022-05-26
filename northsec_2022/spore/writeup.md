@@ -36,13 +36,14 @@ Once we log in with the provided credentials, we see the following page-- the on
 
  ![Logged in](./logged_in.png)
 
- ![Button and Toggle](./liberate.png)
 
-Looking at the page source (second screenshot in the above series), we see that the "Liberate your NFTs" button calls the `liberate` function from the page javascript, which makes a POST request to `/publish` with a password in the POST body. Interestingly, this password seems to be hardcoded into the page script, and looks to be the password we just used to log in. This is absolutely suspicious, but by itself doesn't seem exploitable, since we'd need to be logged in as the administrator already to see the password, or would need some means of recovering the page body served to another user.
+Looking at the page source (screenshot below this paragraph), we see that the "Liberate your NFTs" button calls the `liberate` function from the page javascript, which makes a POST request to `/publish` with a password in the POST body. Interestingly, this password seems to be hardcoded into the page script, and looks to be the password we just used to log in. This is absolutely suspicious, but by itself doesn't seem exploitable, since we'd need to be logged in as the administrator already to see the password, or would need some means of recovering the page body served to another user.
+
+ ![Button and Toggle](./liberate.png)
 
 The Dark Mode toggle, however, is interesting-- from the source in the above screenshot we can see that all it does it redirect the user to the same page (`/main`), but adds a query parameter of `?color=DarkGray`. This looks like it may be providing a color value that is then directly incorporated into the page somewhere; visiting the link we can see that the background of the page is indeed now gray, and looking at the source, we can see that the CSS served with the page now contains `background-color: DarkGray`:
 
- ![Dark Mode Enabled]('./darkmode.png)
+ ![Dark Mode Enabled](./darkmode.png)
 
 As a quick test to confirm the parameter is actually being included directly, we can try some variations on this URL, such as `/main?color=blue`, and `/main?color=thisismalformed_;background-color: red`. The blue payload sets the page color as expected, and the malformed payload also sets the page color:
 
