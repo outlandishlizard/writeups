@@ -9,19 +9,19 @@ Ouyaya is proud to offer a brand new customer experience with
 NTFs by releasing the SPORE platform, a plateform to free your
  NFTs to the world, in exchange for Shiitakoin.
 > 
-Ouyaya knows there will be a virtual housing crisis soon. With this
+> Ouyaya knows there will be a virtual housing crisis soon. With this
 disruptive new portal, Ouyaya is a key player in solving this problem, 
 before it even exists.
 >
-To try this amazing new portal, visit spore.ctf.
+> To try this amazing new portal, visit spore.ctf.
 >
-You can login using beta@spore.ctf/6gqab1
+> You can login using beta@spore.ctf/6gqab1
 >
-P.S. The application is still in beta. If you encounter any problems,
+> P.S. The application is still in beta. If you encounter any problems,
 use http://spore-feedback.ctf/ to send any links with issues.
 admin@spore.ctf will visit it and might provide help.
 >
-Anatoli Boon
+> Anatoli Boon
 CEO @ OUYAYA
 =====
 
